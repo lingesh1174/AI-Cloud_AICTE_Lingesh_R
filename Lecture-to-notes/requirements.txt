@@ -1,0 +1,8 @@
+streamlit
+openai-whisper
+transformers
+torch
+fpdf
+google-genai
+python-dotenv
+imageio[ffmpeg]
