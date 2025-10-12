@@ -1,11 +1,5 @@
-import streamlit as st
 import os
-import backend_core as core
-import tempfile
-import json
-import time
-from datetime import datetime
-from dotenv import load_dotenv # <-- NOW INCLUDED: Import for loading .env
+from dotenv import load_dotenv
 
 # --- API Key Setup: Reads Key from .env File ---
 load_dotenv() # Load variables from .env file into os.environ
@@ -13,13 +7,20 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 if not GEMINI_API_KEY:
     # Display error message on the screen if the key is missing from the environment
-    st.error("❌ Gemini API key not found. Please set GEMINI_API_KEY in your local **.env** file and ensure the python-dotenv library is installed.")
+    st.error("❌ Gemini API key not found. Please set GEMINI_API_KEY in your local *.env* file and ensure the python-dotenv library is installed.")
     # Exit early since we cannot proceed without the AI model
     st.stop()
 # The key is now loaded into os.environ for backend_core to access.
-# --- END API Key Setup ---
 
-# --- CUSTOM UI STYLING (Remains the same) ---
+import streamlit as st
+import backend_core as core
+import tempfile
+import json
+import time
+from datetime import datetime
+
+
+# --- CUSTOM UI STYLING ---
 def load_css():
     st.markdown("""
         <style>
@@ -67,7 +68,7 @@ load_css()
 # --- END CUSTOM UI STYLING ---
 
 
-# --- SESSION STATE (Simplified) ---
+# --- SESSION STATE---
 if 'history' not in st.session_state:
     st.session_state.history = core.load_history()
 if 'current_transcript' not in st.session_state:
@@ -86,7 +87,7 @@ if 'notes_generated' not in st.session_state:
     st.session_state.notes_generated = False
 
 
-# --- SHARE FUNCTION (Remains the same) ---
+# --- SHARE FUNCTION ---
 def share_content(notes, audio_name):
     shareable_notes = json.dumps(notes, indent=2) if isinstance(notes, (list, dict)) else notes
     share_text = f"📝 Check out my notes for the lecture '{audio_name}'!\n\n---\n\n{shareable_notes}"
@@ -124,11 +125,11 @@ def format_structured_output(data, output_type):
 
 
 # --- MAIN UI ---
-st.title("🗣️ Lecture Voice-to-Notes Generator")
+st.title("🗣 Lecture Voice-to-Notes Generator")
 st.markdown("---")
 
 with st.container(border=True):
-    st.subheader("⚙️ Lecture Processor")
+    st.subheader("⚙ Lecture Processor")
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
@@ -139,7 +140,6 @@ with st.container(border=True):
             key="file_uploader"
         )
 
-        # Languages
         languages = {
             "English": "en",
             "Tamil": "ta",
@@ -157,7 +157,7 @@ with st.container(border=True):
         lang_name = st.selectbox("Language", list(languages.keys()), key="lang_select")
         lang_code = languages[lang_name]
 
-        # Output type radio (unselected default)
+        # Output type radio
         st.session_state.next_output_type = st.radio(
             "Select Output Type for Step 3:",
             ("Quiz", "Flashcards"),
@@ -204,7 +204,7 @@ with st.container(border=True):
 
     with col3:
         st.caption("Step 3: Generate Study Tools")
-        st.markdown(f"Generate *{st.session_state.next_output_type or 'Quiz/Flashcards'}* from Notes.")
+        st.markdown(f"Generate {st.session_state.next_output_type or 'Quiz/Flashcards'} from Notes.")
 
         if st.session_state.notes_generated and st.session_state.current_transcript:
             output_to_generate = st.session_state.next_output_type
@@ -285,7 +285,7 @@ else:
                 st.code(st.session_state.current_transcript or "Transcript not available.", language='text')
             
             st.markdown("---")
-            st.subheader("⬇️ Download & Share")
+            st.subheader("⬇ Download & Share")
             create_download_buttons(st.session_state.saved_notes, "Notes")
         else:
             st.info("No Notes available yet.")
@@ -297,7 +297,7 @@ else:
         if quiz_data:
             if isinstance(quiz_data, list) and all('options' in q for q in quiz_data):
                 for i, q in enumerate(quiz_data):
-                    st.markdown(f"**Q{i+1}: {q['question']}**")
+                    st.markdown(f"*Q{i+1}: {q['question']}*")
                     user_answer = st.radio(
                         f"Your answer for Q{i+1}",
                         list(q['options'].keys()),
@@ -312,13 +312,13 @@ else:
                             st.error(f"❌ Incorrect! Correct answer: {q['correct']}")
                     st.markdown("---")
             else:
-                st.error("⚠️ Quiz Parsing Failed.")
+                st.error("⚠ Quiz Parsing Failed.")
                 st.info("The AI model failed to return structured JSON. Displaying raw output for debug:")
                 with st.expander("Raw AI Output (Debug)", expanded=False):
                     st.code(str(quiz_data), language='text')
             
             st.markdown("---")
-            st.subheader("⬇️ Download & Share")
+            st.subheader("⬇ Download & Share")
             create_download_buttons(st.session_state.saved_quiz, "Quiz")
         else:
             st.info("Generate a quiz to view content.")
@@ -331,15 +331,15 @@ else:
             if isinstance(flashcards, list):
                 for f in flashcards:
                     with st.expander(f"💡 {f.get('term', 'Term')}"):
-                        st.write(f"**Definition:** {f.get('definition', 'No definition')}")
+                        st.write(f"*Definition:* {f.get('definition', 'No definition')}")
             else:
-                st.error("⚠️ Flashcard Parsing Failed.")
+                st.error("⚠ Flashcard Parsing Failed.")
                 st.info("The AI model failed to return structured JSON. Displaying raw output for debug:")
                 with st.expander("Raw AI Output (Debug)", expanded=False):
                     st.code(str(flashcards), language='text')
             
             st.markdown("---")
-            st.subheader("⬇️ Download & Share")
+            st.subheader("⬇ Download & Share")
             create_download_buttons(st.session_state.saved_flashcards, "Flashcards")
         else:
             st.info("Generate flashcards to view content.")
@@ -348,7 +348,7 @@ else:
 
     # FEEDBACK SECTION (Moved to its own container)
     with st.container(border=True):
-        st.subheader("⭐️ User Feedback")
+        st.subheader("⭐ User Feedback")
         # --- Feedback Form ---
         with st.form("feedback_form", clear_on_submit=True):
             rating = st.select_slider("Rate Output Quality:", [1, 2, 3, 4, 5], value=5)
@@ -385,7 +385,7 @@ if st.session_state.history:
             
             st.rerun()
     st.sidebar.markdown("---")
-    if st.sidebar.button("🗑️ Clear History"):
+    if st.sidebar.button("🗑 Clear History"):
         if os.path.exists(core.HISTORY_FILE):
             os.remove(core.HISTORY_FILE)
         # Reset all core state variables
